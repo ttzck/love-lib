@@ -1,24 +1,24 @@
 --- element : {
 ---   id : string
----   style : string
 ---   children : table
 ---   factory : {
----      input : function
----      output : function
+---      input : function # takes the element, returns a table with stable ids as keys and the input objects as values
+---      output : function # takes input object, the time when it was first added to cache, and the time when it was last seen, returns an element that will be a child or nil (then the input object will be removed from cache)
 ---   }
 ---   draw : function
 ---   click : function
 ---   hover: function
 ---}
----
+
 --- style : {
----   width : max | [0..]
----   height : max | [0..]
+---   width : [0..]
+---   height : [0..]
+---   radius: [0..]
 ---   padding : {
----      left : max | [0..]
----      right : max | [0..]
----      bottom : max | [0..]
----      top : max | [0..]
+---      left : [0..]
+---      right : [0..]
+---      bottom : [0..]
+---      top : [0..]
 ---   }
 ---   align : left | right| bottom | top | horizontal | vertical
 ---   fill : color
@@ -28,8 +28,43 @@
 ---   }
 --- }
 
-Ui = {
+Ui = { draw = {} }
 
-   width = "max",
-   height = "max",
-}
+function Ui.draw.rectangle(element, style)
+   love.graphics.rectangle("fill", element.x, element.y, style.width, style.height)
+end
+
+local function run_factory(element)
+   local factory = element.factory
+   if factory.cache == nil then
+      factory.cache = {}
+   end
+   -- collect inputs
+   local input = element.factory.input(element)
+   local cache = factory.cache
+   for id, obj in pairs(input) do
+      if cache[id] == nil then
+         cache[id] = { first_seen = love.timer.getTime() }
+      end
+      cache[id].obj = obj
+      cache[id].last_seen = love.timer.getTime()
+   end
+   -- create children
+   element.children = {}
+   local children = element.children
+   local nil_ids = {}
+   for id, cache_obj in pairs(cache) do
+      local output = factory.output(cache_obj)
+      if output then
+         children[id] = output
+      else
+         nil_ids[id] = true
+      end
+   end
+   -- clean-up
+   for id, _ in pairs(nil_ids) do
+      cache[id] = nil
+   end
+end
+
+function Ui.layout(element) end

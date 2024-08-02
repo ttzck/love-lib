@@ -2,10 +2,10 @@ Core = {
    archetypes = {},
    entities = {},
    systems = {},
-   updateOrder = {},
-   drawOrder = {},
-   setupOrder = {},
-   destroyOrder = {},
+   update_order = {},
+   draw_order = {},
+   setup_order = {},
+   destroy_order = {},
 }
 
 local unique_id = 0
@@ -18,10 +18,10 @@ end
 ---@param id string
 ---@param ... any
 ---@return string
-function Core.newArchetype(id, ...)
+function Core.new_archetype(id, ...)
    local archetype = {
       id = id or new_unique_id(),
-      metaId = "ARCHETYPE",
+      meta_id = "ARCHETYPE",
       tags = {},
    }
    Core.archetypes[archetype.id] = archetype
@@ -37,10 +37,10 @@ end
 ---@param id string
 ---@param archetype_id string
 ---@return string
-function Core.newEntity(id, archetype_id)
+function Core.new_entity(id, archetype_id)
    local entity = {
       id = id or new_unique_id(),
-      metaId = "ENTITY",
+      meta_id = "ENTITY",
       destroyed = false,
       tags = {},
    }
@@ -51,7 +51,7 @@ function Core.newEntity(id, archetype_id)
       table.insert(entity.tags, tag)
    end
 
-   for _, system_id in ipairs(Core.setupOrder) do
+   for _, system_id in ipairs(Core.setup_order) do
       local system = Core.systems[system_id]
       if entity.tags[system.tag] then
          system.action(entity)
@@ -66,7 +66,7 @@ end
 ---@param priority integer
 ---@param action function
 ---@return string id new system's id
-function Core.newSystem(tag, id, priority, action)
+function Core.new_system(tag, id, priority, action)
    local system = {
       id = tag .. "." .. (id or new_unique_id()),
       tag = tag,
@@ -82,29 +82,29 @@ local insert_and_sort_system_order = function(order, tag, id, priority, action)
    local sort_by_priority = function(a, b)
       return Core.systems[a].priority <= Core.systems[b].priority
    end
-   local system_id = Core.newSystem(tag, id, priority, action)
+   local system_id = Core.new_system(tag, id, priority, action)
    table.insert(order, system_id)
    table.sort(order, sort_by_priority)
    return system_id
 end
 
-function Core.newSetupSystem(tag, id, priority, action)
-   return insert_and_sort_system_order(Core.setupOrder, tag, id, priority, action)
+function Core.new_setup_system(tag, id, priority, action)
+   return insert_and_sort_system_order(Core.setup_order, tag, id, priority, action)
 end
 
-function Core.newDestroySystem(tag, id, priority, action)
-   return insert_and_sort_system_order(Core.destroyOrder, tag, id, priority, action)
+function Core.new_destroy_system(tag, id, priority, action)
+   return insert_and_sort_system_order(Core.destroy_order, tag, id, priority, action)
 end
 
-function Core.newUpdateSystem(tag, id, priority, action)
-   return insert_and_sort_system_order(Core.updateOrder, tag, id, priority, action)
+function Core.new_update_system(tag, id, priority, action)
+   return insert_and_sort_system_order(Core.update_order, tag, id, priority, action)
 end
 
-function Core.newDrawSystem(tag, id, priority, action)
-   return insert_and_sort_system_order(Core.drawOrder, tag, id, priority, action)
+function Core.new_draw_system(tag, id, priority, action)
+   return insert_and_sort_system_order(Core.draw_order, tag, id, priority, action)
 end
 
-function Core.compileGroups()
+function Core.compile_groups()
    Core.groups = {}
    for _, entity in pairs(Core.entities) do
       for _, tag in pairs(entity.tags) do
@@ -116,7 +116,7 @@ function Core.compileGroups()
    end
 end
 
-function Core.forEach(tag, func)
+function Core.for_each(tag, func)
    local group = Core.groups[tag]
    for _, entity_id in pairs(group) do
       func(Core.entity[entity_id])
@@ -124,33 +124,33 @@ function Core.forEach(tag, func)
 end
 
 function Core.update(dt)
-   for _, system_id in ipairs(Core.updateOrder) do
+   for _, system_id in ipairs(Core.update_order) do
       local system = Core.systems[system_id]
-      Core.forEach(system.tag, function(entity)
+      Core.for_each(system.tag, function(entity)
          system.action(entity, dt)
       end)
    end
 end
 
 function Core.draw()
-   for _, system_id in ipairs(Core.drawOrder) do
+   for _, system_id in ipairs(Core.draw_order) do
       local system = Core.systems[system_id]
-      Core.forEach(system.tag, system.action)
+      Core.for_each(system.tag, system.action)
    end
 end
 
 -- Examples
-Core.newSetupSystem(ID.Tower, "position", 99, function(self)
+Core.new_setup_system(ID.Tower, "position", 99, function(self)
    self.position = { x = 0, y = 0 }
 end)
 
-Core.newArchetype("bombTower", ID.Tower, "hi")
+Core.new_archetype("bombTower", ID.Tower, "hi")
 
-Core.newSetupSystem("bombTower", "cooldown", 99, function(self)
+Core.new_setup_system("bombTower", "cooldown", 99, function(self)
    self.cooldown = 3
 end)
 
-local tow = Core.newEntity(ID.Singleton, "bombTower")
+local tow = Core.new_entity(ID.Singleton, "bombTower")
 
 function dump(o, depth)
    depth = depth or 0
