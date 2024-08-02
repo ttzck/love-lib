@@ -140,16 +140,6 @@ function Core.draw()
 end
 
 -- Examples
-
-ID = {
-   Tower = "",
-   Singleton = "",
-}
-
-for key, _ in pairs(ID) do
-   ID[key] = key
-end
-
 Core.newSetupSystem(ID.Tower, "position", 99, function(self)
    self.position = { x = 0, y = 0 }
 end)
