@@ -170,5 +170,3 @@ function dump(o, depth)
       return tostring(o)
    end
 end
-
-print(dump(Core))
