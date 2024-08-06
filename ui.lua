@@ -1,9 +1,13 @@
 --- element : {
+---   x : number,
+---   y: number,
 ---   id : string
+---   text : string
+---   style :
 ---   children : table
 ---   factory : {
 ---      input : function # takes the element, returns a table with stable ids as keys and the input objects as values
----      output : function # takes input object, the time when it was first added to cache, and the time when it was last seen, returns an element that will be a child or nil (then the input object will be removed from cache)
+---      output : function # takes input object, the corresponding ui element (nil if first added to cache), the time when it was first added to cache, and the time when it was last seen. returns an element that will be a child or nil (then the input object will be removed from cache)
 ---   }
 ---   draw : function
 ---   click : function
@@ -11,27 +15,67 @@
 ---}
 
 --- style : {
----   width : [0..]
----   height : [0..]
----   radius: [0..]
+---   width : number
+---   height : number
+---   radius: number
 ---   padding : {
----      left : [0..]
----      right : [0..]
----      bottom : [0..]
----      top : [0..]
+---      left : number
+---      right : number
+---      up : number
+---      down : number
 ---   }
----   align : left | right| bottom | top | horizontal | vertical
+---   align : Ui.alignment 
 ---   fill : color
 ---   text : {
 ---      color : color
 ---      font : font
+---      align : love.AlignMode
 ---   }
 --- }
 
-Ui = { draw = {} }
+--- @alias Ui.alignment
+---| "left"
+---| "right"
+---| "up"
+---| "down"
+---| "horizontal" -- not supported
+---| "vertical" -- not supported
 
-function Ui.draw.rectangle(element, style)
-   love.graphics.rectangle("fill", element.x, element.y, style.width, style.height)
+Ui = {} 
+
+local default_padding = { left = 0, right = 0, up = 0, down = 0 }
+
+Ui.draw_functions = {}
+
+function Ui.draw_functions.rectangle(element)
+   local style = element.style
+   Utils.graphics.set_color_hex(style.fill)
+   love.graphics.rectangle("fill", element.x, element.y, style.width, style.height, style.radius)
+end
+
+-- TODO: use coloredtext
+function Ui.draw_functions.printf(element)
+   local style = element.style
+   Utils.graphics.set_color_hex(style.text.color)
+   love.graphics.printf(element.text, element.x, element.y, style.width, style.align)
+end
+
+function Ui.draw_functions.compose(...)
+   funcs = {...}
+   return function(element)
+      for _, func in ipairs(funcs) do
+         func(element)
+      end
+   end
+end
+
+function Ui.draw(element)
+   if element.draw then element:draw() end
+   if element.children then
+      for _, child in pairs(element.children) do
+         Ui.draw(child)
+      end
+   end
 end
 
 local function run_factory(element)
@@ -39,32 +83,62 @@ local function run_factory(element)
    if factory.cache == nil then
       factory.cache = {}
    end
-   -- collect inputs
-   local input = element.factory.input(element)
+   -- update cache with input
+   local input = factory.input(element)
    local cache = factory.cache
    for id, obj in pairs(input) do
       if cache[id] == nil then
          cache[id] = { first_seen = love.timer.getTime() }
       end
-      cache[id].obj = obj
+      cache[id].input = obj
       cache[id].last_seen = love.timer.getTime()
+   end
+   -- update chache with output
+   local nil_outputs = {}
+   for id, entry in pairs(cache) do
+      local output = factory.output(entry.input, entry.output, entry.first_seen, entry.last_seen)
+      cache[id].output = output
+      if output == nil then
+         nil_outputs[id] = true
+      end
+   end
+   -- chache clean-up
+   for id, _ in pairs(nil_outputs) do
+      cache[id] = nil
    end
    -- create children
    element.children = {}
    local children = element.children
-   local nil_ids = {}
-   for id, cache_obj in pairs(cache) do
-      local output = factory.output(cache_obj)
-      if output then
-         children[id] = output
-      else
-         nil_ids[id] = true
-      end
-   end
-   -- clean-up
-   for id, _ in pairs(nil_ids) do
-      cache[id] = nil
+   -- TODO: sort children by a order defined by output
+   for id, entry in pairs(cache) do
+      element.children[id] = entry.output
    end
 end
 
-function Ui.layout(element) end
+function Ui.build(element)
+   if element.factory then 
+      run_factory(element)
+      for _, child in pairs(element.children) do
+         Ui.build(child)
+      end
+   end
+end
+
+function Ui.layout(element) 
+   if element.x == nil then element.x = 0 end
+   if element.y == nil then element.y = 0 end
+   -- assume allign is left
+   local x_offset = element.x
+   local children = element.children or {}
+   for _, child in pairs(children) do
+      local style = child.style
+      local padding = style.padding or default_padding
+      x_offset = x_offset + padding.left
+      child.x = x_offset
+      x_offset = x_offset + style.width + padding.right
+      child.y = element.y + padding.up
+   end
+   for _, child in pairs(children) do
+      Ui.layout(child)
+   end
+end
