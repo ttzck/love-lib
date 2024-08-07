@@ -1,3 +1,5 @@
+-- TODO: turn this into proper documentation
+
 --- element : {
 ---   x : number,
 ---   y: number,
@@ -61,8 +63,14 @@ end
 -- TODO: use coloredtext
 function Ui.draw_functions.printf(element)
    local style = element.style
+   local font = style.text.font or love.graphics.getFont()
+   local _, lines = font:getWrap(element.text, style.width)
+   local lineHeight = font:getLineHeight() * font:getHeight()
+   local totalHeight = #lines * lineHeight
+   local y = element.y + (style.height - totalHeight) / 2
    set_color_hex(style.text.color)
-   love.graphics.printf(element.text, element.x, element.y, style.width, style.align)
+   love.graphics.setFont(font)
+   love.graphics.printf(element.text, element.x, y, style.width, style.text.align)
 end
 
 function Ui.draw_functions.compose(...)
