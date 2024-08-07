@@ -151,22 +151,3 @@ Core.new_setup_system("bombTower", "cooldown", 99, function(self)
 end)
 
 local tow = Core.new_entity(ID.Singleton, "bombTower")
-
-function dump(o, depth)
-   depth = depth or 0
-   if type(o) == "table" then
-      local s = "{ \n"
-      for k, v in pairs(o) do
-         if type(k) ~= "number" then
-            k = '"' .. k .. '"'
-         end
-         for _ = 1, depth, 1 do
-            s = s .. "   "
-         end
-         s = s .. "[" .. k .. "] = " .. dump(v, depth + 1) .. ", \n"
-      end
-      return s .. "}\n"
-   else
-      return tostring(o)
-   end
-end

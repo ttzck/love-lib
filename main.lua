@@ -1,5 +1,5 @@
-require("ui")
 require("utils")
+require("ui")
 
 function love.load()
    WindowWidth, WindowHeight = love.window.getMode()
@@ -12,7 +12,8 @@ function love.load()
       padding = { left = 10, right = 10, up = 100, down = 0 },
       align = "left",
       fill = "#333333",
-      text = { color = "#ffff00", font = nil, align = "center" },
+      fill_hover = "#111111",
+      text = { color = "#ffffff", font = nil, align = "center" },
    }
 
    test_data = {}
@@ -21,7 +22,7 @@ function love.load()
       style = {
          width = WindowWidth,
          height = WindowHeight,
-         align = "horizontal",
+         align = "right",
       },
       factory = {
          input = function(_)
@@ -56,6 +57,6 @@ end
 function love.draw()
    Ui.build(test_ui)
    Ui.layout(test_ui)
+   Ui.hover(test_ui)
    Ui.draw(test_ui)
 end
-
