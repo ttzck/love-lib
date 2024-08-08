@@ -24,14 +24,14 @@ function love.load()
       style = {
          width = WindowWidth,
          height = WindowHeight,
-         align = "right",
+         align = "horizontal",
       },
       factory = {
          input = function(_)
             return test_data
          end,
          output = function(input, output, _, last_seen)
-            if love.timer.getTime() - last_seen > 1 then
+            if love.timer.getTime() - last_seen > .5 then
                return nil
             end
             output = output
@@ -40,8 +40,8 @@ function love.load()
                   draw = Ui.draw_functions.compose(Ui.draw_functions.rectangle, Ui.draw_functions.printf),
                   text = input,
                }
-            output.style.width = 100 - (love.timer.getTime() - last_seen) * 100
-            output.style.height = 100 - (love.timer.getTime() - last_seen) * 100
+            output.style.draw_width = 100 - (love.timer.getTime() - last_seen) * 200
+            output.style.draw_height = 100 - (love.timer.getTime() - last_seen) * 200
             return output
          end,
       },
@@ -52,7 +52,7 @@ function love.keypressed(key)
    if test_data[key] then
       test_data[key] = nil
    else
-      test_data[key] = key .. "Lorem ipsum dolor sit amet"
+      test_data[key] = key .. " 󱡁  " .. "Lorem ipsum dolor sit amet"
    end
 end
 
@@ -61,13 +61,4 @@ function love.draw()
    Ui.layout(test_ui)
    Ui.hover(test_ui)
    Ui.draw(test_ui)
-   Utils.graphics.set_color_hex("#000000")
-   love.graphics.rectangle("line", 100, 100, 100, 100)
-   love.graphics.printf(
-      "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Praesent lacinia ac nunc nec lobortis. Donec et lectus luctus, porttitor odio non, bibendum est. Aliquam sit amet iaculis tortor. Maecenas consectetur nec diam at lacinia. Nullam semper ante eget nibh dapibus condimentum. Pellentesque molestie ornare scelerisque. Suspendisse sodales massa fermentum, varius massa id, elementum tellus. Proin condimentum velit et elit congue faucibus. Mauris pretium, risus non imperdiet pellentesque, mi diam egestas magna, nec ultrices nulla quam porttitor leo. ",
-      100,
-      100,
-      100,
-      "center"
-   )
 end

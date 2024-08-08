@@ -57,7 +57,11 @@ function Ui.draw_functions.rectangle(element)
    else
       set_color_hex(style.fill)
    end
-   love.graphics.rectangle("fill", element.x, element.y, style.width, style.height, style.radius)
+   local width = style.draw_width or style.width
+   local height = style.draw_height or style.height
+   local x = element.x + style.width / 2 - width / 2
+   local y = element.y + style.height / 2 - height / 2
+   love.graphics.rectangle("fill", x, y, width, height, style.radius)
 end
 
 -- TODO: use coloredtext
