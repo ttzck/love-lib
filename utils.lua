@@ -60,3 +60,31 @@ function Utils.table.pretty_string(o, depth)
    end
 end
 
+Utils.timer = {}
+function Utils.timer.time_since(time)
+   return love.timer.getTime() - time
+end
+
+function Utils.timer.lerp(a, b, t0, d)
+   local time_since = Utils.timer.time_since
+   local t = time_since(t0) / d
+   return a * (1 - t) + b * t
+end
+
+Utils.math = {}
+--- see https://www.youtube.com/watch?v=LSNQuFEDOyQ
+function Utils.math.exp_decay(a, b, decay, dt)
+   return b + (a - b) * math.exp(-decay * dt)
+end
+
+function Utils.math.clamp(value, min, max)
+   if value < min then
+      return min
+   end
+
+   if value > max then
+      return max
+   end
+
+   return value
+end

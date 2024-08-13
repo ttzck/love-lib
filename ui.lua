@@ -43,7 +43,7 @@
 ---| "horizontal"
 ---| "vertical"
 
-Ui = {}
+Ui = { root = {} }
 
 local default_padding = { left = 0, right = 0, up = 0, down = 0 }
 local set_color_hex = Utils.graphics.set_color_hex
@@ -52,7 +52,7 @@ Ui.draw_functions = {}
 
 function Ui.draw_functions.rectangle(element)
    local style = element.style
-   if element.hover and style.fill_hover then
+   if element.mouse_inside and style.fill_hover then
       set_color_hex(style.fill_hover)
    else
       set_color_hex(style.fill)
@@ -61,6 +61,10 @@ function Ui.draw_functions.rectangle(element)
    local height = style.draw_height or style.height
    local x = element.x + style.width / 2 - width / 2
    local y = element.y + style.height / 2 - height / 2
+   if element.mouse_inside then
+      x = x + (style.hover_offset_x or 0)
+      y = y + (style.hover_offset_y or 0)
+   end
    love.graphics.rectangle("fill", x, y, width, height, style.radius)
 end
 
@@ -71,10 +75,56 @@ function Ui.draw_functions.printf(element)
    local _, lines = font:getWrap(element.text, style.width)
    local lineHeight = font:getLineHeight() * font:getHeight()
    local totalHeight = #lines * lineHeight
+   local x = element.x
    local y = element.y + (style.height - totalHeight) / 2
+   if element.mouse_inside then
+      x = x + (style.hover_offset_x or 0)
+      y = y + (style.hover_offset_y or 0)
+   end
    set_color_hex(style.text.color)
    love.graphics.setFont(font)
-   love.graphics.printf(element.text, element.x, y, style.width, style.text.align)
+   love.graphics.printf(element.text, x, y, style.width, style.text.align)
+end
+
+function Ui.draw_functions.image(element)
+   local style = element.style
+   local width = style.draw_width or style.width
+   local height = style.draw_height or style.height
+   local x = element.x + style.width / 2 - width / 2
+   local y = element.y + style.height / 2 - height / 2
+   if element.mouse_inside then
+      x = x + (style.hover_offset_x or 0)
+      y = y + (style.hover_offset_y or 0)
+   end
+   local image = element.image
+   Utils.graphics.set_color_hex("#ffffff")
+   love.graphics.draw(image, x, y, 0, width / image:getPixelWidth(), height / image:getPixelHeight())
+end
+
+function Ui.draw_functions.progress_bar(element)
+   local x = element.x
+   local y = element.y
+   local style = element.style
+   if style.highlight and style.delayed_ratio then
+      Utils.graphics.set_color_hex(style.highlight)
+      love.graphics.rectangle(
+         "fill",
+         x,
+         y,
+         style.width * style.delayed_ratio,
+         style.height,
+         math.min(style.radius, style.width * style.delayed_ratio)
+      )
+   end
+   Utils.graphics.set_color_hex(style.progress)
+   love.graphics.rectangle(
+      "fill",
+      x,
+      y,
+      style.width * style.ratio,
+      style.height,
+      math.min(style.radius, style.width * style.ratio)
+   )
 end
 
 function Ui.draw_functions.compose(...)
@@ -87,6 +137,7 @@ function Ui.draw_functions.compose(...)
 end
 
 function Ui.draw(element)
+   element = element or Ui.root
    if element.draw then
       element:draw()
    end
@@ -127,14 +178,13 @@ local function run_factory(element)
    end
    -- create children
    element.children = {}
-   local children = element.children
-   -- TODO: sort children by a order defined by output
    for id, entry in pairs(cache) do
       element.children[id] = entry.output
    end
 end
 
 function Ui.build(element)
+   element = element or Ui.root
    if element.factory then
       run_factory(element)
       for _, child in pairs(element.children) do
@@ -143,42 +193,62 @@ function Ui.build(element)
    end
 end
 
--- TODO: align up, down, vertical (generalize x, y to axis1, axis2)
 function Ui.layout(element)
+   element = element or Ui.root
    if element.x == nil then
       element.x = 0
    end
    if element.y == nil then
       element.y = 0
    end
-   local children = element.children or {}
-   -- get total width of children
-   local total_width = 0
-   for _, child in pairs(children) do
+   if not element.children then
+      return
+   end
+   local children = {}
+   for _, child in pairs(element.children) do
+      table.insert(children, child)
+   end
+   table.sort(children, function(a, b)
+      return a.order < b.order
+   end)
+   local align = element.style.align or "left"
+   local x, y = "x", "y"
+   local width, height = "width", "height"
+   local left, right = "left", "right"
+   local up, down = "up", "down"
+   if align == "up" or align == "vertical" or align == "down" then
+      x, y = "y", "x"
+      width, height = "height", "width"
+      left, right = "up", "down"
+      up, down = "left", "right"
+   end
+   -- get total width of children or
+   local children_width = 0
+   for _, child in ipairs(children) do
       local style = child.style
       local padding = style.padding or default_padding
-      total_width = total_width + padding.left + style.width + padding.right
+      children_width = children_width + padding[left] + style[width] + padding[right]
    end
    -- initialize offset
-   local align = element.style.align
-   local x_offset = 0
-   if align == "left" then
-      x_offset = element.x
-   elseif align == "horizontal" then
-      x_offset = element.x + (element.style.width - total_width) / 2
-   elseif align == "right" then
-      x_offset = element.x + (element.style.width - total_width)
+   local offset = 0
+   if align == "left" or align == "up" then
+      offset = element[x]
+   elseif align == "horizontal" or align == "vertical" then
+      offset = element[x] + (element.style[width] - children_width) / 2
+   elseif align == "right" or align == "down" then
+      offset = element[x] + (element.style[width] - children_width)
    end
    -- place children
-   for _, child in pairs(children) do
+   for _, child in ipairs(children) do
       local style = child.style
       local padding = style.padding or default_padding
-      x_offset = x_offset + padding.left
-      child.x = x_offset
-      x_offset = x_offset + style.width + padding.right
-      child.y = element.y + padding.up
+      offset = offset + padding[left]
+      child[x] = offset
+      offset = offset + style[width] + padding[right]
+      -- TODO: alingment option for secondary axis
+      child[y] = element[y] + padding[up]
    end
-   for _, child in pairs(children) do
+   for _, child in ipairs(children) do
       Ui.layout(child)
    end
 end
@@ -190,10 +260,44 @@ local function recurse(func, element)
    end
 end
 
-function Ui.hover(element)
+local function is_mouse_inside(element)
    local x1, y1 = element.x, element.y
    local x2, y2 = x1 + element.style.width, y1 + element.style.height
    local mouse_x, mouse_y = love.mouse.getX(), love.mouse.getY()
-   element.hover = x1 <= mouse_x and mouse_x <= x2 and y1 <= mouse_y and mouse_y <= y2
+   return x1 <= mouse_x and mouse_x <= x2 and y1 <= mouse_y and mouse_y <= y2
+end
+
+function Ui.hover(element)
+   element = element or Ui.root
+   local mouse_was_inside = element.mouse_inside
+   local mouse_is_inside = is_mouse_inside(element)
+   if not mouse_was_inside and mouse_is_inside and element.hover then
+      element:hover()
+   end
+   element.mouse_inside = mouse_is_inside
    recurse(Ui.hover, element)
+end
+
+local function find_deepest_element(element, pred)
+   local deepest_element
+   if pred(element) then
+      deepest_element = element
+   end
+   local children = element.children or {}
+   for _, child in pairs(children) do
+      deepest_element = find_deepest_element(child, pred) or deepest_element
+   end
+   return deepest_element
+end
+
+function Ui.click(button, element)
+   element = element or Ui.root
+   local deepest_element = find_deepest_element(element, function(e)
+      return e.click and is_mouse_inside(e)
+   end)
+   if deepest_element then
+      deepest_element:click(button)
+      return true
+   end
+   return false
 end

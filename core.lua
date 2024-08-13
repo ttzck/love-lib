@@ -139,15 +139,37 @@ function Core.draw()
    end
 end
 
--- Examples
-Core.new_setup_system(ID.Tower, "position", 99, function(self)
-   self.position = { x = 0, y = 0 }
-end)
+local function print_entries(table)
+   for _, entry in pairs(table) do
+      print(entry.id)
+   end
+end
 
-Core.new_archetype("bombTower", ID.Tower, "hi")
+local function print_system_order(table)
+   for _, entry in ipairs(table) do
+      print(entry.priority, entry.id)
+   end
+end
 
-Core.new_setup_system("bombTower", "cooldown", 99, function(self)
-   self.cooldown = 3
-end)
-
-local tow = Core.new_entity(ID.Singleton, "bombTower")
+function Core.print()
+   print("Archetypes")
+   print_entries(Core.archetypes)
+   print("---")
+   print("Entities")
+   print_entries(Core.entities)
+   print("---")
+   print("Systems")
+   print_entries(Core.systems)
+   print("---")
+   print("Update Order")
+   print_system_order(Core.update_order)
+   print("---")
+   print("Draw Order")
+   print_system_order(Core.draw_order)
+   print("---")
+   print("Setup Order")
+   print_system_order(Core.setup_order)
+   print("---")
+   print("Destroy Order")
+   print_system_order(Core.destroy_order)
+end
