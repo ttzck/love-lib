@@ -98,7 +98,7 @@ function love.load()
       },
    }
 
-   Ui.root = test_bar_ui
+   Ui.root = test_ui
 end
 
 function love.keypressed(key)

@@ -139,6 +139,14 @@ function Core.draw()
    end
 end
 
+function Core.remove_destroyed_entities()
+   for _, entity in pairs(Core.entities) do
+      if entity.destroyed then
+         Core.entities[entity.id] = nil
+      end
+   end
+end
+
 local function print_entries(table)
    for _, entry in pairs(table) do
       print(entry.id)
