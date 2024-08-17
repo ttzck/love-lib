@@ -18,6 +18,10 @@ function Utils.graphics.set_color_hex(hex)
 end
 
 Utils.table = {}
+---comment
+---@param obj any
+---@param seen? any
+---@return any
 function Utils.table.deepcopy(obj, seen)
    seen = seen or {}
    if obj == nil then
@@ -71,6 +75,12 @@ function Utils.timer.lerp(a, b, t0, d)
    return a * (1 - t) + b * t
 end
 
+function Utils.timer.interpolate(a, b, c, t0, d)
+   local time_since = Utils.timer.time_since
+   local t = time_since(t0) / d
+   return a * (1 - math.pow(t, c)) + b * math.pow(t, c)
+end
+
 Utils.math = {}
 --- see https://www.youtube.com/watch?v=LSNQuFEDOyQ
 function Utils.math.exp_decay(a, b, decay, dt)
@@ -80,11 +90,26 @@ end
 function Utils.math.clamp(value, min, max)
    if value < min then
       return min
-   end
-
-   if value > max then
+   elseif value > max then
       return max
    end
-
    return value
+end
+
+Utils.random = {}
+function Utils.random.radian()
+   return love.math.random() * 2.0 * math.pi
+end
+
+function Utils.random.on_unit_circle()
+   local phi = Utils.random.radian()
+   return { x = math.cos(phi), y = math.sin(phi) }
+end
+
+function Utils.random.in_unit_square()
+   return { x = love.math.random(), y = love.math.random() }
+end
+
+function Utils.random.in_rectangle(w, h)
+   return { x = love.math.random() * w, y = love.math.random() * h }
 end

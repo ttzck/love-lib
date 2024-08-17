@@ -34,10 +34,10 @@ function Core.new_archetype(id, ...)
 end
 
 ---comment
----@param id string
+---@param id string?
 ---@param archetype_id string
 ---@return string
-function Core.new_entity(id, archetype_id)
+function Core.new_entity(id, archetype_id, options)
    local entity = {
       id = id or new_unique_id(),
       meta_id = "ENTITY",
@@ -48,13 +48,13 @@ function Core.new_entity(id, archetype_id)
 
    local archetype = Core.archetypes[archetype_id]
    for _, tag in pairs(archetype.tags) do
-      table.insert(entity.tags, tag)
+      entity.tags[tag] = tag
    end
 
    for _, system_id in ipairs(Core.setup_order) do
       local system = Core.systems[system_id]
       if entity.tags[system.tag] then
-         system.action(entity)
+         system.action(entity, options)
       end
    end
 
@@ -109,17 +109,39 @@ function Core.compile_groups()
    for _, entity in pairs(Core.entities) do
       for _, tag in pairs(entity.tags) do
          if not Core.groups[tag] then
-            Core.groups[tag] = {}
+            Core.groups[tag] = { n = 0 }
          end
-         Core.groups[tag][entity.id] = entity.id
+         table.insert(Core.groups[tag], entity.id)
+         Core.groups[tag].n = Core.groups[tag].n + 1
       end
    end
 end
 
-function Core.for_each(tag, func)
+function Core.get_group(tag)
    local group = Core.groups[tag]
-   for _, entity_id in pairs(group) do
-      func(Core.entity[entity_id])
+   if group then
+      local entities = {}
+      for _, id in pairs(group) do
+         entities[id] = Core.entities[id]
+      end
+      return entities
+   end
+   return {}
+end
+
+function Core.get_random_entity(tag)
+   if not Core.groups[tag] then
+      return nil
+   end
+   local n = Core.groups[tag].n
+   local entity_id = Core.groups[tag][math.random(n)]
+   return Core.entities[entity_id]
+end
+
+function Core.for_each(tag, func)
+   local group = Core.groups[tag] or {}
+   for _, entity_id in ipairs(group) do
+      func(Core.entities[entity_id])
    end
 end
 
@@ -140,9 +162,19 @@ function Core.draw()
 end
 
 function Core.remove_destroyed_entities()
+   local destroyed = {}
    for _, entity in pairs(Core.entities) do
       if entity.destroyed then
-         Core.entities[entity.id] = nil
+         table.insert(destroyed, entity)
+      end
+   end
+   for _, entity in pairs(destroyed) do
+      Core.entities[entity.id] = nil
+      for _, system_id in ipairs(Core.destroy_order) do
+         local system = Core.systems[system_id]
+         if entity.tags[system.tag] then
+            system.action(entity)
+         end
       end
    end
 end
@@ -154,9 +186,19 @@ local function print_entries(table)
 end
 
 local function print_system_order(table)
-   for _, entry in ipairs(table) do
-      print(entry.priority, entry.id)
+   for i, entry in ipairs(table) do
+      print(i, entry)
    end
+end
+
+local function print_groups() end
+
+function Core.number_of_entities()
+   local c = 0
+   for _, _ in pairs(Core.entities) do
+      c = c + 1
+   end
+   return c
 end
 
 function Core.print()
@@ -180,4 +222,7 @@ function Core.print()
    print("---")
    print("Destroy Order")
    print_system_order(Core.destroy_order)
+   print("---")
+   print("Groups")
+   print()
 end

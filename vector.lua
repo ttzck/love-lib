@@ -1,6 +1,11 @@
 Vector = {}
 
+---@alias vector { x : number, y : number }
+
 --- Function to create a new Vector
+---@param x number?
+---@param y number?
+---@return vector
 function Vector.new(x, y)
    return { x = x or 0, y = y or 0 }
 end
@@ -27,7 +32,7 @@ end
 
 --- Magnitude (length) of a Vector
 function Vector.mag(v)
-   return math.sqrt(v.x ^ 2 + v.y ^ 2)
+   return math.sqrt(v.x * v.x + v.y * v.y)
 end
 
 --- Normalization of a Vector (returns a unit Vector)
@@ -40,7 +45,26 @@ function Vector.normalize(v)
    end
 end
 
----- Normalized Vector pointing from a to b
+--- Clamp Vectors magnitude to max_mag
+function Vector.clamp(v, max_mag)
+   if Vector.mag(v) > max_mag then
+      return Vector.mul(Vector.normalize(v), max_mag)
+   end
+   return v
+end
+
+---Returns the vector between the tip of v1 to the tip of v2
+---@param v1 vector
+---@param v2 vector
+---@return vector
+function Vector.between(v1, v2)
+   return Vector.sub(v2, v1)
+end
+
+---Returns a unit vector pointing from the tip of v1 to the tip of v2
+---@param v1 vector
+---@param v2 vector
+---@return vector
 function Vector.normal(v1, v2)
    return Vector.normalize(Vector.sub(v2, v1))
 end
