@@ -154,19 +154,23 @@ local function run_factory(element)
       factory.cache = {}
    end
    -- update cache with input
-   local input = factory.input(element)
    local cache = factory.cache
+   for id, _ in pairs(cache) do
+      cache[id].live = false
+   end
+   local input = factory.input(element)
    for id, obj in pairs(input) do
       if cache[id] == nil then
          cache[id] = { first_seen = love.timer.getTime() }
       end
       cache[id].input = obj
+      cache[id].live = true
       cache[id].last_seen = love.timer.getTime()
    end
    -- update chache with output
    local nil_outputs = {}
    for id, entry in pairs(cache) do
-      local output = factory.output(entry.input, entry.output, entry.first_seen, entry.last_seen)
+      local output = factory.output(entry.input, entry.output, entry.live, entry.first_seen, entry.last_seen)
       cache[id].output = output
       if output == nil then
          nil_outputs[id] = true
@@ -187,6 +191,8 @@ function Ui.build(element)
    element = element or Ui.root
    if element.factory then
       run_factory(element)
+   end
+   if element.children then
       for _, child in pairs(element.children) do
          Ui.build(child)
       end
@@ -209,7 +215,7 @@ function Ui.layout(element)
       table.insert(children, child)
    end
    table.sort(children, function(a, b)
-      return a.order < b.order
+      return (a.order or 0) < (b.order or 0)
    end)
    local align = element.style.align or "left"
    local x, y = "x", "y"
@@ -278,21 +284,27 @@ function Ui.hover(element)
    recurse(Ui.hover, element)
 end
 
-local function find_deepest_element(element, pred)
+function Ui.find_deepest_element(element, pred)
    local deepest_element
    if pred(element) then
       deepest_element = element
    end
    local children = element.children or {}
    for _, child in pairs(children) do
-      deepest_element = find_deepest_element(child, pred) or deepest_element
+      deepest_element = Ui.find_deepest_element(child, pred) or deepest_element
    end
    return deepest_element
 end
 
+function Ui.find(element, id)
+   return Ui.find_deepest_element(element, function(e)
+      return e.id == id
+   end)
+end
+
 function Ui.click(button, element)
    element = element or Ui.root
-   local deepest_element = find_deepest_element(element, function(e)
+   local deepest_element = Ui.find_deepest_element(element, function(e)
       return e.click and is_mouse_inside(e)
    end)
    if deepest_element then

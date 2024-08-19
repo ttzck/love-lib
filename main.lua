@@ -1,61 +1,71 @@
-require("utils")
-require("ui")
-require("core")
-require("particles")
-require("vector")
-local bump = require("bump")
-require("physics_object")
-require("unit")
-require("projectile")
+local active_scene = {}
 
-function love.load()
-   WindowWidth, WindowHeight = 800, 600
-   love.window.setMode(WindowWidth, WindowHeight, { msaa = 0 })
-   love.graphics.setBackgroundColor(0.1, 0.1, 0.1)
-
-   Physics = bump.newWorld(64)
-
-   for i = 1, 10, 1 do
-      local rand_pos = Utils.random.in_rectangle(WindowWidth / 2, WindowHeight)
-      Core.new_entity(nil, "defender", {
-         position = rand_pos,
-         width = 8,
-         height = 8,
-         color = "#ff0000",
-         speed = 32,
-         range = 128,
-         attack_period = 3,
-      })
-      local rand_pos = Utils.random.in_rectangle(WindowWidth / 2, WindowHeight)
-      Core.new_entity(nil, "invader", {
-         position = Vector.add(rand_pos, Vector.new(WindowWidth / 2)),
-         width = 8,
-         height = 8,
-         color = "#0000ff",
-         speed = 32,
-         range = 128,
-         attack_period = 3,
-      })
+function SetActiveScene(scene)
+   active_scene = scene
+   if active_scene.load then
+      active_scene.load()
    end
 end
 
-function love.keypressed(key) end
+function love.load()
+   WINDOW_WIDTH, WINDOW_HEIGHT = 1200, 800
+   love.window.setMode(WINDOW_WIDTH, WINDOW_HEIGHT, { msaa = 2 })
+   love.graphics.setBackgroundColor(0.1, 0.1, 0.1)
+   FONT_8 = love.graphics.newFont("ubuntu-regular.ttf", 8)
+   FONT_12 = love.graphics.newFont("ubuntu-regular.ttf", 12)
+   FONT_16 = love.graphics.newFont("ubuntu-regular.ttf", 16)
+   FONT_32 = love.graphics.newFont("ubuntu-regular.ttf", 32)
+   FONT_64 = love.graphics.newFont("ubuntu-bold.ttf", 64)
+   BASE_Y = 7 * WINDOW_HEIGHT / 8
+   BONG_001 = love.audio.newSource("kenney_interface-sounds/Audio/bong_001.ogg", "static")
+   CLICK_002 = love.audio.newSource("kenney_interface-sounds/Audio/click_002.ogg", "static")
+   CLICK_003 = love.audio.newSource("kenney_interface-sounds/Audio/click_003.ogg", "static")
+   QUESTION_001 = love.audio.newSource("kenney_interface-sounds/Audio/question_001.ogg", "static")
+   DROP_003 = love.audio.newSource("kenney_interface-sounds/Audio/drop_003.ogg", "static")
+   DROP_001 = love.audio.newSource("kenney_interface-sounds/Audio/drop_001.ogg", "static")
+   TICK_001 = love.audio.newSource("kenney_interface-sounds/Audio/tick_001.ogg", "static")
+   SELECT_001 = love.audio.newSource("kenney_interface-sounds/Audio/select_001.ogg", "static")
+   CONFIRMATION_001 = love.audio.newSource("kenney_interface-sounds/Audio/confirmation_001.ogg", "static")
+   GLASS_006 = love.audio.newSource("kenney_interface-sounds/Audio/glass_006.ogg", "static")
+
+   require("utils")
+   require("hand")
+   require("ui")
+   require("core")
+   require("particles")
+   require("vector")
+   require("physics_object")
+   require("time_object")
+   require("unit")
+   require("projectile")
+   require("main_ui")
+   require("waves")
+   require("main_scene")
+   require("audio_explorer")
+
+   SetActiveScene(MainScene)
+end
 
 function love.draw()
-   Particles.draw()
-   Core.remove_destroyed_entities()
-   Core.compile_groups()
-   Core.draw()
-
-   Utils.graphics.set_color_hex("#ffffff")
-   love.graphics.print("Current FPS: " .. tostring(love.timer.getFPS()), 10, 10)
-   love.graphics.print("Number of Entities:" .. tostring(Core.number_of_entities()), 10, 20)
+   if active_scene.draw then
+      active_scene.draw()
+   end
 end
 
 function love.update(dt)
-   Core.remove_destroyed_entities()
-   Core.compile_groups()
-   Core.update(dt)
+   if active_scene.update then
+      active_scene.update(dt)
+   end
 end
 
-function love.mousepressed(_, _, button) end
+function love.mousepressed(_, _, button)
+   if active_scene.mousepressed then
+      active_scene.mousepressed(_, _, button)
+   end
+end
+
+function love.keypressed(key)
+   if active_scene.keypressed then
+      active_scene.keypressed(key)
+   end
+end

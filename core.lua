@@ -1,5 +1,4 @@
 Core = {
-   archetypes = {},
    entities = {},
    systems = {},
    update_order = {},
@@ -15,29 +14,11 @@ local function new_unique_id()
 end
 
 ---comment
----@param id string
----@param ... any
----@return string
-function Core.new_archetype(id, ...)
-   local archetype = {
-      id = id or new_unique_id(),
-      meta_id = "ARCHETYPE",
-      tags = {},
-   }
-   Core.archetypes[archetype.id] = archetype
-
-   for _, tag in ipairs({ archetype.id, ... }) do
-      archetype.tags[tag] = tag
-   end
-
-   return archetype.id
-end
-
----comment
----@param id string?
----@param archetype_id string
----@return string
-function Core.new_entity(id, archetype_id, options)
+---@param id? any
+---@param tags any
+---@param options any
+---@return any
+function Core.new_entity(id, tags, options)
    local entity = {
       id = id or new_unique_id(),
       meta_id = "ENTITY",
@@ -46,8 +27,7 @@ function Core.new_entity(id, archetype_id, options)
    }
    Core.entities[entity.id] = entity
 
-   local archetype = Core.archetypes[archetype_id]
-   for _, tag in pairs(archetype.tags) do
+   for _, tag in pairs(tags) do
       entity.tags[tag] = tag
    end
 
@@ -80,7 +60,7 @@ end
 
 local insert_and_sort_system_order = function(order, tag, id, priority, action)
    local sort_by_priority = function(a, b)
-      return Core.systems[a].priority <= Core.systems[b].priority
+      return Core.systems[a].priority < Core.systems[b].priority
    end
    local system_id = Core.new_system(tag, id, priority, action)
    table.insert(order, system_id)
@@ -179,19 +159,24 @@ function Core.remove_destroyed_entities()
    end
 end
 
-local function print_entries(table)
-   for _, entry in pairs(table) do
-      print(entry.id)
+local function entries_to_string(t)
+   local max_length = 10
+   local s = {}
+   local n = 0
+   for _, entry in pairs(t) do
+      n = n + 1
+      if type(entry) == "table" then
+         s[n] = entry.id
+      else
+         s[n] = entry
+      end
+      if n == max_length then
+         s[n + 1] = "..."
+         break
+      end
    end
+   return table.concat(s, "\n")
 end
-
-local function print_system_order(table)
-   for i, entry in ipairs(table) do
-      print(i, entry)
-   end
-end
-
-local function print_groups() end
 
 function Core.number_of_entities()
    local c = 0
@@ -201,28 +186,25 @@ function Core.number_of_entities()
    return c
 end
 
-function Core.print()
-   print("Archetypes")
-   print_entries(Core.archetypes)
-   print("---")
-   print("Entities")
-   print_entries(Core.entities)
-   print("---")
-   print("Systems")
-   print_entries(Core.systems)
-   print("---")
-   print("Update Order")
-   print_system_order(Core.update_order)
-   print("---")
-   print("Draw Order")
-   print_system_order(Core.draw_order)
-   print("---")
-   print("Setup Order")
-   print_system_order(Core.setup_order)
-   print("---")
-   print("Destroy Order")
-   print_system_order(Core.destroy_order)
-   print("---")
-   print("Groups")
-   print()
+function Core.to_string()
+   local s = {
+      "Entities",
+      entries_to_string(Core.entities),
+      "---",
+      "Systems",
+      entries_to_string(Core.systems),
+      "---",
+      "Update Order",
+      entries_to_string(Core.update_order),
+      "---",
+      "Draw Order",
+      entries_to_string(Core.draw_order),
+      "---",
+      "Setup Order",
+      entries_to_string(Core.setup_order),
+      "---",
+      "Destroy Order",
+      entries_to_string(Core.destroy_order),
+   }
+   return table.concat(s, "\n")
 end

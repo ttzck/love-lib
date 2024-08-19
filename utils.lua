@@ -65,19 +65,20 @@ function Utils.table.pretty_string(o, depth)
 end
 
 Utils.timer = {}
-function Utils.timer.time_since(time)
-   return love.timer.getTime() - time
+function Utils.timer.time_since(time, now)
+   now = now or love.timer.getTime()
+   return now - time
 end
 
-function Utils.timer.lerp(a, b, t0, d)
+function Utils.timer.lerp(a, b, t0, d, now)
    local time_since = Utils.timer.time_since
-   local t = time_since(t0) / d
+   local t = time_since(t0, now) / d
    return a * (1 - t) + b * t
 end
 
-function Utils.timer.interpolate(a, b, c, t0, d)
+function Utils.timer.interpolate(a, b, c, t0, d, now)
    local time_since = Utils.timer.time_since
-   local t = time_since(t0) / d
+   local t = time_since(t0, now) / d
    return a * (1 - math.pow(t, c)) + b * math.pow(t, c)
 end
 
@@ -112,4 +113,10 @@ end
 
 function Utils.random.in_rectangle(w, h)
    return { x = love.math.random() * w, y = love.math.random() * h }
+end
+
+Utils.input = {}
+function Utils.input.mouse_position()
+   local x, y = love.mouse.getPosition()
+   return Vector.new(x, y)
 end

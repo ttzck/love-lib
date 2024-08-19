@@ -73,3 +73,12 @@ end
 function Vector.dist(v1, v2)
    return Vector.mag(Vector.sub(v2, v1))
 end
+
+--- Rotate vector phi radians
+function Vector.rot(v, phi)
+   local sin = math.sin(phi)
+   local cos = math.cos(phi)
+   local x = v.x * cos - v.y * sin
+   local y = v.x * sin + v.y * cos
+   return Vector.new(x, y)
+end
