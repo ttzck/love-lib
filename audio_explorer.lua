@@ -9,7 +9,6 @@ function AudioExplorer.load()
    local files = love.filesystem.getDirectoryItems(AudioExplorer.path)
    for _, file in ipairs(files) do
       n = n + 1
-      local info = love.filesystem.getInfo(file)
       local path = AudioExplorer.path .. "/" .. file
       audio[n] = {
          file = file,
