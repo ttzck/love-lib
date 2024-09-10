@@ -23,6 +23,10 @@ function love.load()
    require("particles")
    require("vector")
    require("audio_explorer")
+   require("grid_test_scene")
+   require("collision_test_scene")
+   require("space_partitioning")
+   SetActiveScene(GridTestScene)
 end
 
 function love.draw()

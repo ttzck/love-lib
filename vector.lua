@@ -30,6 +30,11 @@ function Vector.dot(v1, v2)
    return v1.x * v2.x + v1.y * v2.y
 end
 
+--- squared Magnitude (length) of a Vector
+function Vector.sqr_mag(v)
+   return v.x * v.x + v.y * v.y
+end
+
 --- Magnitude (length) of a Vector
 function Vector.mag(v)
    return math.sqrt(v.x * v.x + v.y * v.y)
@@ -67,6 +72,11 @@ end
 ---@return vector
 function Vector.normal(v1, v2)
    return Vector.normalize(Vector.sub(v2, v1))
+end
+
+--- squared distance between two Vectors
+function Vector.sqr_dist(v1, v2)
+   return Vector.sqr_mag(Vector.sub(v2, v1))
 end
 
 --- Distance between two Vectors
