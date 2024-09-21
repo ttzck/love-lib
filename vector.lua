@@ -50,6 +50,10 @@ function Vector.normalize(v)
    end
 end
 
+function Vector.set_mag(v, mag)
+   return Vector.mul(Vector.normalize(v), mag)
+end
+
 --- Clamp Vectors magnitude to max_mag
 function Vector.clamp(v, max_mag)
    if Vector.mag(v) > max_mag then

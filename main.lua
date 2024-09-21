@@ -26,7 +26,12 @@ function love.load()
    require("grid_test_scene")
    require("collision_test_scene")
    require("space_partitioning")
-   SetActiveScene(GridTestScene)
+   require("main_scene")
+   require("enemy")
+   require("arrow")
+   require("cards")
+   require("player")
+   SetActiveScene(MainScene)
 end
 
 function love.draw()
@@ -50,5 +55,11 @@ end
 function love.keypressed(key)
    if active_scene.keypressed then
       active_scene.keypressed(key)
+   end
+end
+
+function love.mousereleased(x, y, button, istouch, presses)
+   if active_scene.mousereleased then
+      active_scene.mousereleased(x, y, button, istouch, presses)
    end
 end

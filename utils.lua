@@ -1,6 +1,12 @@
 Utils = {}
 
+---@class color : string hex representation of a color, start with #
+
 Utils.color = {}
+
+---comment
+---@param hex color
+---@return table
 function Utils.color.from_hex(hex)
    local r = tonumber(string.sub(hex, 2, 3), 16) / 256
    local g = tonumber(string.sub(hex, 4, 5), 16) / 256
@@ -61,6 +67,14 @@ function Utils.table.pretty_string(o, depth)
       return s .. "}\n"
    else
       return tostring(o)
+   end
+end
+
+--- fisher-yates shuffle
+function Utils.table.shuffle(t)
+   for i = #t, 2, -1 do
+      local j = love.math.random(i)
+      t[i], t[j] = t[j], t[i]
    end
 end
 

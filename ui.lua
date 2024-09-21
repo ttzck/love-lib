@@ -127,6 +127,43 @@ function Ui.draw_functions.progress_bar(element)
    )
 end
 
+-- this will replace draw_functions
+Ui.utils = {}
+
+---draws a progress bar
+---@param options {x : number, y : number, width : number, height : number, primary_color : color, secondary_color : color?, background_color : color, radius : number, primary_ratio : number, secondary_ratio : number}
+function Ui.utils.progress_bar(options)
+   Utils.graphics.set_color_hex(options.background_color)
+   love.graphics.rectangle(
+      "fill",
+      options.x,
+      options.y,
+      options.width * options.primary_ratio,
+      options.height,
+      math.min(options.radius, options.width)
+   )
+   if options.secondary_color and options.secondary_ratio then
+      Utils.graphics.set_color_hex(options.secondary_color)
+      love.graphics.rectangle(
+         "fill",
+         options.x,
+         options.y,
+         options.width * options.secondary_ratio,
+         options.height,
+         math.min(options.radius, options.width * options.secondary_ratio)
+      )
+   end
+   Utils.graphics.set_color_hex(options.primary_color)
+   love.graphics.rectangle(
+      "fill",
+      options.x,
+      options.y,
+      options.width * options.primary_ratio,
+      options.height,
+      math.min(options.radius, options.width * options.primary_ratio)
+   )
+end
+
 function Ui.draw_functions.compose(...)
    local funcs = { ... }
    return function(element)
