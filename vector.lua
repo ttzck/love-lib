@@ -96,3 +96,7 @@ function Vector.rot(v, phi)
    local y = v.x * sin + v.y * cos
    return Vector.new(x, y)
 end
+
+function Vector.x_axis_angle(v)
+   return math.atan2(v.y, v.x)
+end

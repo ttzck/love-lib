@@ -13,10 +13,9 @@ function Cards.new_arrow()
       end,
       aim = function()
          local mouse = Utils.input.mouse_position()
-         Utils.graphics.set_color_hex("#ffffff")
-         love.graphics.setLineWidth(1)
-         love.graphics.setLineStyle("smooth")
-         love.graphics.line(TowerPosition.x, TowerPosition.y, mouse.x, mouse.y)
+         local n = Vector.normal(TowerPosition, mouse)
+         local p2 = Vector.add(TowerPosition, Vector.mul(n, WINDOW_WIDTH))
+         Utils.graphics.dashed_line(TowerPosition, p2, 8, 16, "#333333", 2)
       end,
    }
 end
@@ -25,7 +24,9 @@ function Cards.new_dud()
    return {
       name = "Dud",
       play = function() end,
-      aim = function() end,
+      aim = function()
+         Utils.graphics.dashed_circle(Utils.input.mouse_position(), 32, "#333333", 2, 8)
+      end,
    }
 end
 

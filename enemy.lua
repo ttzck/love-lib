@@ -2,8 +2,8 @@ Enemy = {}
 
 Core.new_setup_system("enemy", "setup", 0, function(enemy, options)
    enemy.position = options.position
-   enemy.radius = 4
-   enemy.color = "#ff0000"
+   enemy.radius = 8
+   enemy.color = "#ffffff"
    enemy.speed = 16
    enemy.hp = options.hp
    enemy.delayed_hp = options.hp
@@ -12,7 +12,14 @@ end)
 
 Core.new_draw_system("enemy", "draw_body", 0, function(enemy)
    Utils.graphics.set_color_hex(enemy.color)
-   love.graphics.circle("fill", enemy.position.x, enemy.position.y, enemy.radius)
+   Utils.graphics.draw_cenetered(
+      SKULL,
+      enemy.position.x,
+      enemy.position.y,
+      0,
+      enemy.radius * 2 / SKULL:getHeight(),
+      enemy.radius * 2 / SKULL:getHeight()
+   )
 end)
 
 Core.new_draw_system("enemy", "draw_hp_bar", 1, function(enemy)
@@ -24,7 +31,7 @@ Core.new_draw_system("enemy", "draw_hp_bar", 1, function(enemy)
       width = width,
       height = height,
       primary_color = "#00ff00",
-      secondary_color = "#ffffff",
+      secondary_color = "#ff0000",
       background_color = "#000000",
       radius = 2,
       primary_ratio = enemy.hp / enemy.max_hp,

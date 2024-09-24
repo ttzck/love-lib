@@ -23,6 +23,52 @@ function Utils.graphics.set_color_hex(hex)
    love.graphics.setColor(Utils.color.from_hex(hex))
 end
 
+function Utils.graphics.rounded_line(p1, p2, c, w)
+   Utils.graphics.set_color_hex(c)
+   love.graphics.setLineStyle("smooth")
+   love.graphics.setLineWidth(w)
+   love.graphics.circle("fill", p1.x, p1.y, w / 2)
+   love.graphics.line(p1.x, p1.y, p2.x, p2.y)
+   love.graphics.circle("fill", p2.x, p2.y, w / 2)
+end
+
+function Utils.graphics.dashed_line(p1, p2, segment_length, spacing, c, w)
+   local n = Vector.normal(p1, p2)
+   local l = Vector.dist(p1, p2)
+   local x = p1
+   while true do
+      local y = Vector.add(x, Vector.mul(n, spacing))
+      local z = Vector.add(y, Vector.mul(n, segment_length))
+      if Vector.dist(p1, z) > l then
+         return
+      end
+      Utils.graphics.rounded_line(y, z, c, w)
+      x = z
+   end
+end
+
+function Utils.graphics.dashed_circle(p, r, c, w, segments)
+   Utils.graphics.set_color_hex(c)
+   love.graphics.setLineStyle("smooth")
+   love.graphics.setLineWidth(w)
+   local angle = math.pi * 2 / (segments * 2)
+   for i = 1, segments do
+      local a1 = angle * (i * 2 - 1)
+      local a2 = angle * (i * 2)
+      local p1 = Vector.add(p, Vector.rot(Vector.new(r, 0), a1))
+      local p2 = Vector.add(p, Vector.rot(Vector.new(r, 0), a2))
+      love.graphics.circle("fill", p1.x, p1.y, w / 2)
+      love.graphics.arc("line", "open", p.x, p.y, r, a1, a2)
+      love.graphics.circle("fill", p2.x, p2.y, w / 2)
+   end
+end
+
+function Utils.graphics.draw_cenetered(image, x, y, r, sx, sy)
+   love.graphics.push()
+   love.graphics.pop()
+   love.graphics.draw(image, x, y, r, sx, sy, image:getWidth() / 2, image:getHeight() / 2)
+end
+
 Utils.table = {}
 ---comment
 ---@param obj any

@@ -120,6 +120,7 @@ end
 ---for debug
 function grid_meta_table:draw()
    Utils.graphics.set_color_hex("#ffffff10")
+   love.graphics.setLineWidth(1)
    for x, _ in pairs(self) do
       if x ~= "cell_size" and self[x] then
          for y, _ in pairs(self[x]) do

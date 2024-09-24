@@ -9,13 +9,16 @@ end
 
 function love.load()
    WINDOW_WIDTH, WINDOW_HEIGHT = 1200, 800
-   love.window.setMode(WINDOW_WIDTH, WINDOW_HEIGHT, { msaa = 2 })
+   love.window.setMode(WINDOW_WIDTH, WINDOW_HEIGHT, { msaa = 4 })
    love.graphics.setBackgroundColor(0.1, 0.1, 0.1)
    FONT_8 = love.graphics.newFont("ubuntu-regular.ttf", 8)
    FONT_12 = love.graphics.newFont("ubuntu-regular.ttf", 12)
    FONT_16 = love.graphics.newFont("ubuntu-regular.ttf", 16)
    FONT_32 = love.graphics.newFont("ubuntu-regular.ttf", 32)
    FONT_64 = love.graphics.newFont("ubuntu-bold.ttf", 64)
+   PERSON = love.graphics.newImage("person-solid.png")
+   TOWER = love.graphics.newImage("chess-rook-solid.png")
+   SKULL = love.graphics.newImage("skull-solid.png")
 
    require("utils")
    require("ui")

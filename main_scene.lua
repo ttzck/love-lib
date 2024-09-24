@@ -33,7 +33,7 @@ function MainScene.draw()
    Core.draw()
    Player.draw()
 
-   EnemyGrid:draw()
+   --EnemyGrid:draw()
 end
 
 function MainScene.keypressed(key) end

@@ -56,7 +56,14 @@ end
 
 function Player.draw()
    Utils.graphics.set_color_hex("#ffffff")
-   love.graphics.circle("fill", TowerPosition.x, TowerPosition.y, 6)
+   Utils.graphics.draw_cenetered(
+      TOWER,
+      TowerPosition.x,
+      TowerPosition.y,
+      0,
+      16 / TOWER:getHeight(),
+      16 / TOWER:getHeight()
+   )
    for i, slot in ipairs(Player.slots) do
       local x = 16
       if slot == Player.selected_slot then
