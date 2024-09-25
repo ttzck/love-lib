@@ -36,7 +36,11 @@ function MainScene.draw()
    --EnemyGrid:draw()
 end
 
-function MainScene.keypressed(key) end
+function MainScene.keypressed(key)
+   if key == "space" then
+      Player.play_card()
+   end
+end
 
 function MainScene.mousereleased(x, y, button)
    if button == 1 then

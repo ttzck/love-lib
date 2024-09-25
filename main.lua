@@ -22,6 +22,7 @@ function love.load()
 
    require("utils")
    require("ui")
+   require("cooldown")
    require("core")
    require("particles")
    require("vector")
