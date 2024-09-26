@@ -1,20 +1,20 @@
 # design doc
 
-# status effects
+## basics
+things concerning all classes
+
+### status effects
 - stun (can't move or attack)
 - weak (takes damage x2)
 - invincible (take no damage)
-
-## basics
-things used by all classes
 
 ### cards
 - rest (heal 1 hp)
 - focus (draw 2 cards)
 - block (invincible for 3 seconds)
-
-### relics
-- quick draw (reduce card draw to 3 seconds)
+- get it back (put the top card from discard pile into hand)
+- a card so nice (play the next card twice)
+- quick draw (for 20 seconds reduce card draw to 3 seconds)
 
 ## archer
 shoots arrows
@@ -29,9 +29,8 @@ shoots arrows
 - salvo (shoots all arrows in draw pile)
 - charged shot (takes the first arrow in hand and shoots it with piercing 2)
 - craft (put a new basic arrow in discard pile)
-- multishot (shoot up to 3 arrows from draw pile)
+- multishot (shoot up to 5 arrows from draw pile at once)
+- rapid fire (shoot up up to 3 arros from draw pile in sequence)
 - fairy dust (for 10 seconds arrows are homing)
 - fire (for 10 seconds arrows apply damage over time)
-
-### relics
-- golden boy (turn all arrows into golden arrows)
+- gild (turn all arrows in hand into golden arrows)
