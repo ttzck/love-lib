@@ -5,6 +5,7 @@ Core.new_setup_system("arrow", "setup", 0, function(arrow, options)
    arrow.radius = 1
    arrow.color = "#ffffff"
    arrow.speed = 360
+   arrow.hit = options.hit
 end)
 
 Core.new_draw_system("arrow", "draw", 0, function(arrow)
@@ -23,9 +24,7 @@ Core.new_update_system("arrow", "move", 1, function(arrow, dt)
    local new_position = Vector.add(arrow.position, movement)
    local query = EnemyGrid:query_circle_sweep(arrow.position, arrow.radius, new_position)
    if query.other then
-      Enemy.take_damage(query.other, arrow.damage)
-      arrow.destroyed = true
-      Particles.new({ position = query.collision_point })
+      arrow:hit(query.other, query.collision_point)
    else
       arrow.position = query.position
    end

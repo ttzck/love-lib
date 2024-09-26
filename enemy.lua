@@ -70,6 +70,7 @@ end)
 
 function Enemy.take_damage(enemy, value)
    enemy.hp = math.max(enemy.hp - value, 0)
+   Particles.number(enemy.position, value)
    if enemy.hp == 0 then
       enemy.destroyed = true
    end

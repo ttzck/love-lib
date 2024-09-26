@@ -4,13 +4,13 @@ Player = {
    slots = { "a", "s", "d", "f", "q", "w", "e", "r" },
    hand = {},
    draw_pile = {
-      Cards.new_arrow(),
-      Cards.new_arrow(),
+      Cards.new_basic_arrow(),
+      Cards.new_basic_arrow(),
       Cards.new_dud(),
-      Cards.new_arrow(),
+      Cards.new_basic_arrow(),
       Cards.new_dud(),
-      Cards.new_arrow(),
-      Cards.new_arrow(),
+      Cards.new_bomb_arrow(),
+      Cards.new_bomb_arrow(),
       Cards.new_sacrifice(),
    },
    discard_pile = {},
@@ -93,6 +93,11 @@ function Player.draw()
          radius = 2,
          primary_ratio = Player.card_play_cooldown:time_left() / Player.card_play_cooldown.duration,
       })
+   end
+   if Player.selected_card() and love.keyboard.isDown("lshift") then
+      local desc = Player.selected_card():description()
+      Utils.graphics.set_color_hex("#ffffff")
+      love.graphics.print(desc, WINDOW_WIDTH / 3, WINDOW_HEIGHT / 3)
    end
 end
 
