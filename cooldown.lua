@@ -1,16 +1,20 @@
-Cooldown = {}
-function Cooldown.new(duration)
+TimeSpan = {}
+function TimeSpan.new(duration, start, time)
    return {
-      timestamp = -math.huge,
       duration = duration,
+      timestamp = start or -math.huge,
+      time = time or love.timer.getTime,
       time_left = function(self)
-         return math.max(0, self.duration - Utils.timer.time_since(self.timestamp))
+         return math.max(0, self.duration - Utils.timer.time_since(self.timestamp, self:time()))
+      end,
+      is_ongoing = function(self)
+         return self:time() > self.timestamp and self:time() < self.timestamp + self.duration
       end,
       is_over = function(self)
          return self:time_left() == 0
       end,
       reset = function(self)
-         self.timestamp = love.timer.getTime()
+         self.timestamp = self:time()
       end,
    }
 end

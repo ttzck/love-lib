@@ -6,17 +6,15 @@ Player = {
    draw_pile = {
       Cards.new_basic_arrow(),
       Cards.new_basic_arrow(),
-      Cards.new_dud(),
-      Cards.new_basic_arrow(),
-      Cards.new_dud(),
+      Cards.new_golden_arrow(),
       Cards.new_bomb_arrow(),
-      Cards.new_bomb_arrow(),
+      Cards.new_poison_arrow(),
       Cards.new_sacrifice(),
    },
    discard_pile = {},
    selected_slot = nil,
-   card_draw_cooldown = Cooldown.new(5),
-   card_play_cooldown = Cooldown.new(1),
+   card_draw_cooldown = TimeSpan.new(5),
+   card_play_cooldown = TimeSpan.new(1),
 }
 
 local function cycle_piles()

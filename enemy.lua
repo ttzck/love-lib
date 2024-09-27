@@ -4,14 +4,18 @@ Core.new_setup_system("enemy", "setup", 0, function(enemy, options)
    enemy.position = options.position
    enemy.radius = 8
    enemy.color = "#ffffff"
-   enemy.speed = 16
+   enemy.speed = 10
    enemy.hp = options.hp
    enemy.delayed_hp = options.hp
    enemy.max_hp = options.max_hp or options.hp
+   enemy.status = Status.new()
 end)
 
 Core.new_draw_system("enemy", "draw_body", 0, function(enemy)
    Utils.graphics.set_color_hex(enemy.color)
+   if enemy.status:is("weak") and math.random() < 0.5 then
+      Utils.graphics.set_color_hex("#00ff00")
+   end
    Utils.graphics.draw_cenetered(
       SKULL,
       enemy.position.x,
@@ -65,10 +69,15 @@ Core.new_update_system("enemy", "calculate_movement", 2, function(enemy, dt)
 end)
 
 Core.new_update_system("enemy", "move", 3, function(enemy, dt)
-   enemy.position = Vector.add(enemy.position, enemy.movement)
+   if not enemy.status:is("stun") then
+      enemy.position = Vector.add(enemy.position, enemy.movement)
+   end
 end)
 
 function Enemy.take_damage(enemy, value)
+   if enemy.status:is("weak") then
+      value = value * 2
+   end
    enemy.hp = math.max(enemy.hp - value, 0)
    Particles.number(enemy.position, value)
    if enemy.hp == 0 then

@@ -100,3 +100,7 @@ end
 function Vector.x_axis_angle(v)
    return math.atan2(v.y, v.x)
 end
+
+function Vector.rot_90(v)
+   return Vector.new(-v.y, v.x)
+end
