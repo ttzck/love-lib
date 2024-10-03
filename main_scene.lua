@@ -33,6 +33,12 @@ function MainScene.keypressed(key)
    if key == "space" then
       Player.play_card()
    end
+   if key == "c" then
+      Player.draw_card()
+   end
+   if key == "v" then
+      Player.restock_draw_pile()
+   end
 end
 
 function MainScene.mousereleased(x, y, button)

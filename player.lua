@@ -1,6 +1,8 @@
 Player = {
    hp = 10,
    max_hp = 10,
+   mana = 20,
+   max_mana = 20,
    slots = { "a", "s", "d", "f", "q", "w", "e", "r" },
    hand = {},
    draw_pile = {
@@ -10,17 +12,36 @@ Player = {
       Cards.new_bomb_arrow(),
       Cards.new_poison_arrow(),
       Cards.new_sacrifice(),
+      Cards.new_basic_arrow(),
+      Cards.new_basic_arrow(),
+      Cards.new_basic_arrow(),
+      Cards.new_basic_arrow(),
+      Cards.new_basic_arrow(),
+      Cards.new_basic_arrow(),
+      Cards.new_basic_arrow(),
+      Cards.new_fairy_dust(),
+      Cards.new_salvo(),
    },
    discard_pile = {},
    selected_slot = nil,
-   card_draw_cooldown = TimeSpan.new(5),
-   card_play_cooldown = TimeSpan.new(1),
+   card_play_cooldown = TimeSpan.new(0.5),
+   mana_regen_cooldown = TimeSpan.new(5, love.timer.getTime()),
+   status = Status.new(),
 }
 
-local function cycle_piles()
+function Player.restock_draw_pile()
+   if #Player.discard_pile == 0 then
+      return
+   end
+   if Player.mana == 0 then
+      return
+   end
    Utils.table.shuffle(Player.discard_pile)
-   Player.draw_pile = Player.discard_pile
+   for _, card in ipairs(Player.discard_pile) do
+      table.insert(Player.draw_pile, card)
+   end
    Player.discard_pile = {}
+   Player.mana = Player.mana - 1
 end
 
 local function first_free_slot()
@@ -32,15 +53,16 @@ local function first_free_slot()
 end
 
 function Player.draw_card()
-   if #Player.discard_pile == 0 and #Player.draw_pile == 0 then
+   if #Player.draw_pile == 0 then
       return
    end
-   if #Player.draw_pile == 0 then
-      cycle_piles()
+   if Player.mana == 0 then
+      return
    end
    local free_slot = first_free_slot()
    if free_slot then
       Player.hand[free_slot] = table.remove(Player.draw_pile)
+      Player.mana = Player.mana - 1
    end
 end
 
@@ -75,7 +97,7 @@ function Player.draw()
    end
    love.graphics.print("Draw Pile: " .. pile_to_string(Player.draw_pile), 16, WINDOW_HEIGHT - 64)
    love.graphics.print("Discard Pile: " .. pile_to_string(Player.discard_pile), 16, WINDOW_HEIGHT - 48)
-   love.graphics.print("Card Draw: " .. math.ceil(Player.card_draw_cooldown:time_left()), 16, WINDOW_HEIGHT - 32)
+   love.graphics.print("Mana: " .. Player.mana .. "/" .. Player.max_mana, 16, WINDOW_HEIGHT - 32)
    love.graphics.print("HP: " .. Player.hp .. "/" .. Player.max_hp, 16, WINDOW_HEIGHT - 16)
    if Player.selected_card() then
       Player.selected_card():aim()
@@ -106,9 +128,16 @@ function Player.update(dt)
          Player.selected_slot = slot
       end
    end
-   if Player.card_draw_cooldown:is_over() then
-      Player.draw_card()
-      Player.card_draw_cooldown:reset()
+   if Player.mana_regen_cooldown:is_over() then
+      if Player.mana < Player.max_mana then
+         if not Player.mana_regen_cooldown.flag then
+            Player.mana = Player.mana + 1
+         end
+         Player.mana_regen_cooldown:reset()
+         Player.mana_regen_cooldown.flag = false
+      else
+         Player.mana_regen_cooldown.flag = true
+      end
    end
 end
 

@@ -101,6 +101,11 @@ function Vector.x_axis_angle(v)
    return math.atan2(v.y, v.x)
 end
 
+-- TODO: test if this is correct
+function Vector.angle_between(v1, v2)
+   return math.abs(Vector.x_axis_angle(v1) - Vector.x_axis_angle(v2))
+end
+
 function Vector.rot_90(v)
    return Vector.new(-v.y, v.x)
 end

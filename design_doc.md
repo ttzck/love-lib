@@ -25,7 +25,7 @@ shoots arrows
     - bomb arrow (aoe damage)
     - poison arrow (apply stun and weak)
     - golden arrow (increase damage if lethal)
-- quiver (draw up to 5 arrows)
+- quiver (draw up to 5 arrows from draw pile)
 - salvo (shoots all arrows in draw pile)
 - charged shot (takes the first arrow in hand and shoots it with piercing 2)
 - craft (put a new basic arrow in discard pile)
