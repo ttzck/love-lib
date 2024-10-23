@@ -5,17 +5,25 @@ TowerPosition = Vector.new(WINDOW_WIDTH / 2, 13 * WINDOW_HEIGHT / 16)
 function MainScene.load() end
 
 function MainScene.update(dt)
-   EnemyGrid = SpacePartitioning.new(32)
+   Grids = {
+      unit = SpacePartitioning.new(32),
+      defender = SpacePartitioning.new(32),
+      invader = SpacePartitioning.new(32),
+   }
    Core.remove_destroyed_entities()
    Core.compile_groups()
    Core.update(dt)
-   Player.update(dt)
 
-   if love.math.random() < 0.01 then
-      Core.new_entity(nil, { "enemy" }, {
-         position = Vector.new(love.math.random() * WINDOW_WIDTH, love.math.random() * WINDOW_HEIGHT / 64),
-         hp = 3,
-      })
+   if love.math.random() < 0.03 then
+      local p = Utils.random.on_unit_circle()
+      p = Vector.mul(p, 100 * love.math.random())
+      local m = Vector.new(WINDOW_WIDTH / 2, WINDOW_HEIGHT / 2)
+      p = Vector.add(p, m)
+      Utils.table.random({Unit.spawn_archer, Unit.spawn_shield_carrier})("defender", p)
+   end
+   if love.math.random() < 0.03 then
+      local p = Vector.new(love.math.random() * WINDOW_WIDTH, love.math.random() * WINDOW_HEIGHT)
+      Unit.spawn_archer("invader", p)
    end
 end
 
@@ -23,10 +31,8 @@ function MainScene.draw()
    Core.remove_destroyed_entities()
    Core.compile_groups()
    Core.draw()
-   Player.draw()
    Particles.draw()
 
-   --EnemyGrid:draw()
 end
 
 function MainScene.keypressed(key)

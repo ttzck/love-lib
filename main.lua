@@ -32,7 +32,7 @@ function love.load()
    require("collision_test_scene")
    require("space_partitioning")
    require("main_scene")
-   require("enemy")
+   require("unit")
    require("arrow")
    require("cards")
    require("player")
@@ -46,6 +46,8 @@ function love.draw()
 end
 
 function love.update(dt)
+   require("lurker.lurker").update()
+   require("lovebird.lovebird").update()
    if active_scene.update then
       active_scene.update(dt)
    end

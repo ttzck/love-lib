@@ -124,6 +124,23 @@ function Utils.table.shuffle(t)
    end
 end
 
+function Utils.table.random(t)
+   local i = love.math.random(#t)
+   return t[i]
+end
+
+function Utils.table.arg_min(t, pred)
+   local arg_min = nil
+   local min = math.huge
+   for _, arg in pairs(t) do
+      if pred(arg) < min then
+         arg_min = arg
+         min = pred(arg)
+      end
+   end
+   return arg_min
+end
+
 Utils.timer = {}
 function Utils.timer.time_since(time, now)
    now = now or love.timer.getTime()

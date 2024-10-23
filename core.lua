@@ -101,7 +101,7 @@ function Core.get_group(tag)
    local group = Core.groups[tag]
    if group then
       local entities = {}
-      for _, id in pairs(group) do
+      for _, id in ipairs(group) do
          entities[id] = Core.entities[id]
       end
       return entities
