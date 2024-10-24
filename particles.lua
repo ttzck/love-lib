@@ -26,10 +26,10 @@ end
 
 function Particles.number(position, n)
    Particles.insert({
-      d = 3,
+      d = 1,
       draw = function(self)
-         Utils.graphics.set_color_hex("#ff0000")
-         love.graphics.print(tostring(n), position.x, position.y)
+         Utils.graphics.set_color_hex("#ffffff")
+         love.graphics.print(tostring(n), FONT_8, position.x, position.y - (love.timer.getTime() - self.t0) * 32)
       end,
       active = function(self)
          return Particles.get_time() <= self.t0 + self.d

@@ -47,6 +47,12 @@ function Utils.graphics.dashed_line(p1, p2, segment_length, spacing, c, w)
    end
 end
 
+---comment
+---@param p any
+---@param r number
+---@param c color
+---@param w number
+---@param segments any
 function Utils.graphics.dashed_circle(p, r, c, w, segments)
    Utils.graphics.set_color_hex(c)
    love.graphics.setLineStyle("smooth")
@@ -60,6 +66,21 @@ function Utils.graphics.dashed_circle(p, r, c, w, segments)
       love.graphics.circle("fill", p1.x, p1.y, w / 2)
       love.graphics.arc("line", "open", p.x, p.y, r, a1, a2)
       love.graphics.circle("fill", p2.x, p2.y, w / 2)
+   end
+end
+
+function Utils.graphics.checkerboard_pattern(p, w, h, n, m, c1, c2)
+   for i = 0, n - 1 do
+      for j = 0, m - 1 do
+         local pp = Vector.new(w * i, h * j)
+         local ppp = Vector.add(p, pp)
+         if (i + j) % 2 == 0 then
+            Utils.graphics.set_color_hex(c1)
+         else
+            Utils.graphics.set_color_hex(c2)
+         end
+         love.graphics.rectangle("fill", ppp.x, ppp.y, w, h)
+      end
    end
 end
 
@@ -321,6 +342,11 @@ end
 function Utils.random.on_unit_circle()
    local phi = Utils.random.radian()
    return { x = math.cos(phi), y = math.sin(phi) }
+end
+
+function Utils.random.on_circle(r)
+   local p = Utils.random.on_unit_circle()
+   return Vector.mul(p, r)
 end
 
 function Utils.random.in_unit_square()
