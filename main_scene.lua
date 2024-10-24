@@ -34,10 +34,10 @@ end
 function MainScene.draw()
    Utils.graphics.checkerboard_pattern(
       Vector.new(0, 0),
-      32,
-      32,
-      WINDOW_WIDTH / 32 + 1,
-      WINDOW_HEIGHT / 32,
+      64,
+      64,
+      WINDOW_WIDTH / 64 + 1,
+      WINDOW_HEIGHT / 64 + 1,
       "#111111",
       "#121212"
    )
