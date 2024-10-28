@@ -84,7 +84,7 @@ function Utils.graphics.checkerboard_pattern(p, w, h, n, m, c1, c2)
    end
 end
 
-function Utils.graphics.draw_cenetered(image, x, y, r, sx, sy)
+function Utils.graphics.draw_centered(image, x, y, r, sx, sy)
    love.graphics.push()
    love.graphics.pop()
    love.graphics.draw(image, x, y, r, sx, sy, image:getWidth() / 2, image:getHeight() / 2)

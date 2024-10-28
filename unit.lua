@@ -203,4 +203,3 @@ function Unit.take_damage(unit, value)
       unit.destroyed = true
    end
 end
-

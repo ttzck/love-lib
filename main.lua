@@ -19,6 +19,7 @@ function love.load()
    PERSON = love.graphics.newImage("person-solid.png")
    TOWER = love.graphics.newImage("chess-rook-solid.png")
    SKULL = love.graphics.newImage("skull-solid.png")
+   TREE = love.graphics.newImage("sprites/tree.png")
 
    require("utils")
    require("ui")

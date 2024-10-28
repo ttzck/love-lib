@@ -76,7 +76,7 @@ end
 
 function Player.draw()
    Utils.graphics.set_color_hex("#ffffff")
-   Utils.graphics.draw_cenetered(
+   Utils.graphics.draw_centered(
       TOWER,
       TowerPosition.x,
       TowerPosition.y,

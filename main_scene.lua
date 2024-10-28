@@ -1,7 +1,21 @@
 MainScene = {}
 
+MainScene.trees = {}
+
 function MainScene.load()
    CENTER = Vector.new(WINDOW_WIDTH / 2, WINDOW_HEIGHT / 2)
+
+   local j = 1
+   for _ = 1, 300 do
+      local p = Utils.random.in_rectangle(WINDOW_WIDTH, WINDOW_HEIGHT)
+      if Vector.dist(p, CENTER) > 380 then
+         MainScene.trees[j] = { p, Utils.table.random({ "#003300", "#004400", "#002200" }) }
+         j = j + 1
+      end
+   end
+   table.sort(MainScene.trees, function(a, b)
+      return a[1].y < b[1].y
+   end)
 end
 
 local function random_invader_spawn_position()
@@ -51,6 +65,11 @@ function MainScene.draw()
    Core.compile_groups()
    Core.draw()
    Particles.draw()
+
+   for _, tree in pairs(MainScene.trees) do
+      Utils.graphics.set_color_hex(tree[2])
+      Utils.graphics.draw_centered(TREE, tree[1].x, tree[1].y, 0, 0.2, 0.2)
+   end
 end
 
 function MainScene.keypressed(key)
