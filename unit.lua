@@ -16,7 +16,7 @@ function Unit.spawn_creep(team, position)
 end
 
 function Unit.spawn_archer(team, position)
-   Core.new_entity(nil, { "archer", "attacker", "move_to_opponent", "unit", team }, {
+   Core.new_entity(nil, { "archer", "attacker", "hit_and_run", "unit", team }, {
       position = position,
    })
 end
@@ -27,10 +27,31 @@ function Unit.spawn_knight(team, position)
    })
 end
 
-function Unit.spawn_ninja(team, position)
-   Core.new_entity(nil, { "ninja", "attacker", "move_to_opponent", "unit", team }, {
+function Unit.spawn_cavalry(team, position)
+   Core.new_entity(nil, { "cavalry", "attacker", "hit_and_run", "unit", team }, {
       position = position,
    })
+end
+
+local function is_in_range(unit)
+   if not unit.closest_opponent then
+      return false
+   end
+   return Vector.sqr_dist(unit.position, unit.closest_opponent.position) < unit.attack_radius * unit.attack_radius
+end
+
+local function charge_in_range(unit)
+   if not is_in_range(unit) then
+      unit.attack_charge = nil
+   elseif not unit.attack_charge then
+      unit.attack_charge = TimeSpan.new(1.0 / unit.attack_rate, love.timer.getTime())
+   end
+end
+
+local function always_charge(unit)
+   if not unit.attack_charge then
+      unit.attack_charge = TimeSpan.new(1.0 / unit.attack_rate, love.timer.getTime())
+   end
 end
 
 local function archer_attack(self)
@@ -54,9 +75,10 @@ Core.new_setup_system("archer", "setup", 0, function(unit, options)
    unit.attack_rate = 0.3
    unit.radius = 3
    unit.attack = archer_attack
+   unit.update_charge = always_charge
 end)
 
-local function knight_attack(self)
+local function melee_attack(self)
    Unit.take_damage(self.closest_opponent, 5)
 end
 
@@ -64,22 +86,25 @@ Core.new_setup_system("knight", "setup", 0, function(unit, options)
    unit.attack_radius = 20
    unit.attack_rate = 1
    unit.radius = 4
-   unit.attack = knight_attack
+   unit.attack = melee_attack
+   unit.update_charge = charge_in_range
 end)
 
-Core.new_setup_system("ninja", "setup", 1, function(unit, options)
+Core.new_setup_system("cavalry", "setup", 1, function(unit, options)
    unit.attack_radius = 20
-   unit.attack_rate = 25
+   unit.attack_rate = 0.1
    unit.radius = 3
-   unit.speed = 200
-   unit.attack = knight_attack
+   unit.speed = 30
+   unit.attack = melee_attack
+   unit.update_charge = always_charge
 end)
 
 Core.new_setup_system("creep", "setup", 0, function(unit, options)
    unit.attack_radius = 20
    unit.attack_rate = 1
    unit.radius = 3
-   unit.attack = knight_attack
+   unit.attack = melee_attack
+   unit.update_charge = charge_in_range
 end)
 
 Core.new_setup_system("defender", "setup", 0, function(unit, options)
@@ -128,20 +153,9 @@ Core.new_update_system("unit", "update_delayed_hp", 0, function(unit, dt)
    unit.delayed_hp = Utils.math.exp_decay(unit.delayed_hp, unit.hp, 2, dt)
 end)
 
-local function is_in_range(unit)
-   if not unit.closest_opponent then
-      return false
-   end
-   return Vector.sqr_dist(unit.position, unit.closest_opponent.position) < unit.attack_radius * unit.attack_radius
-end
-
 Core.new_update_system("attacker", "attack", 2, function(unit, dt)
-   if not is_in_range(unit) then
-      unit.attack_charge = nil
-   elseif not unit.attack_charge then
-      unit.attack_charge = TimeSpan.new(1.0 / unit.attack_rate, love.timer.getTime())
-   end
-   if unit.attack_charge and unit.attack_charge:is_over() then
+   unit:update_charge()
+   if unit.attack_charge and unit.attack_charge:is_over() and is_in_range(unit) then
       unit:attack()
       unit.attack_charge = TimeSpan.new(1.0 / unit.attack_rate, love.timer.getTime())
    end
@@ -165,6 +179,22 @@ Core.new_update_system("move_to_opponent", "update_movement_target", 3, function
    unit.movement_target = nil
    if unit.closest_opponent and not is_in_range(unit) then
       unit.movement_target = unit.closest_opponent.position
+   end
+end)
+
+Core.new_update_system("hit_and_run", "update_movement_target", 3, function(unit, dt)
+   if unit.attack_charge:is_over() then
+      unit.movement_target = unit.closest_opponent.position
+   else
+      local dist_to_opponent = Vector.dist(unit.closest_opponent.position, unit.position)
+      local dist_to_outside = OUTER_RADIUS - Vector.dist(CENTER, unit.position)
+      if dist_to_opponent < dist_to_outside then
+         local n = Vector.normal(unit.closest_opponent.position, unit.position)
+         local p = Vector.add(unit.position, Vector.mul(n, unit.speed))
+         unit.movement_target = p
+      else
+         unit.movement_target = CENTER
+      end
    end
 end)
 

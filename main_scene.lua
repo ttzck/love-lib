@@ -5,6 +5,7 @@ MainScene.spawn_timer = TimeSpan.new(20)
 
 function MainScene.load()
    CENTER = Vector.new(WINDOW_WIDTH / 2, WINDOW_HEIGHT / 2)
+   OUTER_RADIUS = 380
 
    local j = 1
    for _ = 1, 300 do
@@ -20,15 +21,14 @@ function MainScene.load()
 end
 
 local function random_invader_spawn_position()
-   local p = Utils.random.on_circle(380)
+   local p = Utils.random.on_circle(OUTER_RADIUS)
    local m = Vector.new(WINDOW_WIDTH / 2, WINDOW_HEIGHT / 2)
-   return Vector.add(p, m)
+   return Vector.add(p, CENTER)
 end
 
 local function random_defender_spawn_position()
    local p = Utils.random.on_circle(love.math.random() * 20)
-   local m = Vector.new(WINDOW_WIDTH / 2, WINDOW_HEIGHT / 2)
-   return Vector.add(p, m)
+   return Vector.add(p, CENTER)
 end
 
 function MainScene.update(dt)
@@ -92,7 +92,7 @@ function MainScene.keypressed(key)
       Unit.spawn_knight("defender", random_defender_spawn_position())
    end
    if key == "3" then
-      Unit.spawn_ninja("defender", random_defender_spawn_position())
+      Unit.spawn_cavalry("defender", random_defender_spawn_position())
    end
 end
 
