@@ -52,7 +52,7 @@ end
 Core.new_setup_system("archer", "setup", 0, function(unit, options)
    unit.attack_radius = 100
    unit.attack_rate = 0.3
-   unit.radius = 4
+   unit.radius = 3
    unit.attack = archer_attack
 end)
 
@@ -63,7 +63,7 @@ end
 Core.new_setup_system("knight", "setup", 0, function(unit, options)
    unit.attack_radius = 20
    unit.attack_rate = 1
-   unit.radius = 6
+   unit.radius = 4
    unit.attack = knight_attack
 end)
 
@@ -78,7 +78,7 @@ end)
 Core.new_setup_system("creep", "setup", 0, function(unit, options)
    unit.attack_radius = 20
    unit.attack_rate = 1
-   unit.radius = 4
+   unit.radius = 3
    unit.attack = knight_attack
 end)
 
@@ -182,6 +182,9 @@ Core.new_update_system("unit", "resolve_collisions", 101, function(unit, dt)
    for _, other in ipairs(query) do
       if other ~= unit then
          local n = Vector.normal(other.position, unit.position)
+         if Vector.equals(other.position, unit.position) then
+            n = Utils.random.on_unit_circle()
+         end
          local t = Vector.mul(n, unit.radius + other.radius)
          unit.new_position = Vector.add(other.position, t)
          return

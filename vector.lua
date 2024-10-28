@@ -10,6 +10,10 @@ function Vector.new(x, y)
    return { x = x or 0, y = y or 0 }
 end
 
+function Vector.equals(v1, v2)
+   return v1.x == v2.x and v1.y == v2.y
+end
+
 --- Addition of two Vectors
 function Vector.add(v1, v2)
    return Vector.new(v1.x + v2.x, v1.y + v2.y)

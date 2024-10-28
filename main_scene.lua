@@ -1,6 +1,7 @@
 MainScene = {}
 
 MainScene.trees = {}
+MainScene.spawn_timer = TimeSpan.new(20)
 
 function MainScene.load()
    CENTER = Vector.new(WINDOW_WIDTH / 2, WINDOW_HEIGHT / 2)
@@ -40,12 +41,22 @@ function MainScene.update(dt)
    Core.compile_groups()
    Core.update(dt)
 
-   if love.math.random() < 0.1 then
-      Unit.spawn_creep("invader", random_invader_spawn_position())
+   if MainScene.spawn_timer:is_over() then
+      local p = random_invader_spawn_position()
+      for _ = 1, 10 do
+         Unit.spawn_creep("invader", p)
+      end
+      MainScene.spawn_timer:reset()
    end
 end
 
 function MainScene.draw()
+   if love.mouse.isDown(1) then
+      local p = Utils.input.mouse_position()
+      love.graphics.translate(-p.x, -p.y)
+      love.graphics.scale(2, 2)
+   end
+
    Utils.graphics.checkerboard_pattern(
       Vector.new(0, 0),
       64,
@@ -57,9 +68,6 @@ function MainScene.draw()
    )
    Utils.graphics.dashed_circle(CENTER, 20, "#000099", 2, 6)
    Utils.graphics.dashed_circle(CENTER, 380, "#990000", 2, 64)
-   Utils.graphics.set_color_hex("#ffffff")
-   love.graphics.print("1: Archer", FONT_16, 10, WINDOW_HEIGHT - 50)
-   love.graphics.print("2: Knight", FONT_16, 10, WINDOW_HEIGHT - 30)
 
    Core.remove_destroyed_entities()
    Core.compile_groups()
@@ -70,6 +78,10 @@ function MainScene.draw()
       Utils.graphics.set_color_hex(tree[2])
       Utils.graphics.draw_centered(TREE, tree[1].x, tree[1].y, 0, 0.2, 0.2)
    end
+
+   Utils.graphics.set_color_hex("#ffffff")
+   love.graphics.print("1: Archer", FONT_16, 10, WINDOW_HEIGHT - 50)
+   love.graphics.print("2: Knight", FONT_16, 10, WINDOW_HEIGHT - 30)
 end
 
 function MainScene.keypressed(key)
