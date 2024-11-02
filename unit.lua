@@ -16,7 +16,13 @@ function Unit.spawn_creep(team, position)
 end
 
 function Unit.spawn_archer(team, position)
-   Core.new_entity(nil, { "archer", "attacker", "hit_and_run", "unit", team }, {
+   Core.new_entity(nil, { "archer", "attacker", "move_to_opponent", "unit", team }, {
+      position = position,
+   })
+end
+
+function Unit.spawn_healer(team, position) -- TODO
+   Core.new_entity(nil, { "healer", "unit", team }, {
       position = position,
    })
 end
@@ -78,6 +84,13 @@ Core.new_setup_system("archer", "setup", 0, function(unit, options)
    unit.update_charge = always_charge
 end)
 
+Core.new_setup_system("healer", "setup", 0, function(unit, options)
+   unit.range = 100
+   unit.attack_rate = 0.3
+   unit.radius = 3
+   unit.update_charge = always_charge
+end)
+
 local function melee_attack(self)
    Unit.take_damage(self.closest_opponent, 5)
 end
@@ -111,6 +124,7 @@ Core.new_setup_system("defender", "setup", 0, function(unit, options)
    unit.color = "#0000ff"
    unit.team = "defender"
    unit.opponent = "invader"
+   unit.life = TimeSpan.new(60, love.timer.getTime())
 end)
 
 Core.new_setup_system("invader", "setup", 0, function(unit, options)
@@ -144,6 +158,27 @@ Core.new_draw_system("unit", "draw_hp_bar", 1, function(unit)
    })
 end)
 
+Core.new_draw_system("defender", "draw_age", 1, function(unit)
+   local width = 12
+   local height = 1
+   Ui.utils.progress_bar({
+      x = unit.position.x - width / 2,
+      y = unit.position.y - unit.radius - height * 2,
+      width = width,
+      height = height,
+      primary_color = "#ffffff",
+      background_color = "#000000",
+      radius = 2,
+      primary_ratio = unit.life:time_left() / unit.life.duration,
+   })
+end)
+
+Core.new_update_system("defender", "die_of_high_age", 0, function(unit, _)
+   if unit.life:is_over() then
+      unit.destroyed = true
+   end
+end)
+
 Core.new_update_system("unit", "insert_in_grid", 0, function(unit, _)
    Grids.unit:insert(unit, unit.position, unit.radius)
    Grids[unit.team]:insert(unit, unit.position, unit.radius)
@@ -168,17 +203,37 @@ Core.new_update_system("unit", "find_closest_opponent", 0, function(unit, dt)
    end)
 end)
 
+local function sqr_dist(unit)
+   return function (other)
+      return Vector.sqr_dist(unit.position, other.position)
+   end
+end
+
 Core.new_update_system("unit", "find_closest_ally", 0, function(unit, dt)
    local allies = Core.get_group(unit.team)
-   unit.closest_ally = Utils.table.arg_min(allies, function(ally)
-      return Vector.sqr_dist(unit.position, ally.position)
-   end)
+   unit.closest_ally = Utils.table.arg_min(allies, sqr_dist(unit))
 end)
 
 Core.new_update_system("move_to_opponent", "update_movement_target", 3, function(unit, dt)
    unit.movement_target = nil
    if unit.closest_opponent and not is_in_range(unit) then
       unit.movement_target = unit.closest_opponent.position
+   end
+end)
+
+local function wounded(unit)
+   return unit.hp < unit.max_hp
+end
+
+Core.new_update_system("healer", "move_to_wounded_ally", 3, function(unit, dt)
+   local t = Utils.table
+   local allies = Core.get_group(unit.team)
+   local target = t.arg_min(t.filter(allies, wounded), sqr_dist(unit))
+   local sqr_range = unit.range * unit.range
+
+   unit.movement_target = nil
+   if target and sqr_dist(unit)(target) > sqr_range  then
+      unit.movement_target = target.position
    end
 end)
 

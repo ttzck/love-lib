@@ -162,6 +162,16 @@ function Utils.table.arg_min(t, pred)
    return arg_min
 end
 
+function Utils.table.filter(t, pred)
+   local r = {}
+   for k, v in pairs(t) do
+      if pred(v) then
+         r[k] = v
+      end
+   end
+   return r
+end
+
 Utils.timer = {}
 function Utils.timer.time_since(time, now)
    now = now or love.timer.getTime()

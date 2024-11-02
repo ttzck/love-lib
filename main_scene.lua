@@ -94,6 +94,9 @@ function MainScene.keypressed(key)
    if key == "3" then
       Unit.spawn_cavalry("defender", random_defender_spawn_position())
    end
+   if key == "4" then
+      Unit.spawn_healer("defender", random_defender_spawn_position())
+   end
 end
 
 function MainScene.mousereleased(x, y, button) end
